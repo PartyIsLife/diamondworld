@@ -1,0 +1,4 @@
+name: ebaniyocelot
+main: ru.party.Main
+version: 0.1
+depend: [ProtocolLib]
