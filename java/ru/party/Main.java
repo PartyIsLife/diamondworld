@@ -1,16 +1,9 @@
 package ru.party;
 
 import java.io.File;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftItem;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -61,33 +54,6 @@ public class Main extends JavaPlugin implements Listener {
 		    	}
 		    }
 		});
-		
-		pm.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.ENTITY_EQUIPMENT) {
-			@Override
-			public void onPacketSending(PacketEvent event) {
-		        PacketContainer packet = event.getPacket();
-		        Entity ent = packet.getEntityModifier(event).read(0);
-		        if(ent instanceof Zombie) {
-		        	if(!((Zombie) ent).isBaby()|| ((Zombie) ent).getEquipment().getHelmet() != null) {
-		        		Zombie zom = (Zombie) ent;
-		        		packet = event.getPacket().deepClone();
-		        		event.setPacket(packet);
-		        		zom = (Zombie) packet.getEntityModifier(event).read(0);
-		        		zom.getEquipment().setHelmet(new ItemStack(Material.AIR));
-		        		zom.getEquipment().setChestplate(new ItemStack(Material.AIR));
-		        		zom.getEquipment().setLeggings(new ItemStack(Material.AIR));
-		        		zom.getEquipment().setBoots(new ItemStack(Material.AIR));
-		        		
-		        	}
-		        }
-				
-			}
-		});
-		
-
-
-
-		
 	   
 	}
 	
