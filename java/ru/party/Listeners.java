@@ -40,7 +40,16 @@ public class Listeners implements Listener{
 	
 	static ArrayList<UUID> cats = new ArrayList<UUID>();
 	
+	@EventHandler
+	public void onJoin(PlayerJoinEvent e) {
+		
+	}
 
+	@EventHandler
+	public void onQuit(PlayerQuitEvent e) {
+	}
+	
+	
 	
 	@EventHandler
 	public void zombieDead(EntityDeathEvent e) {
@@ -62,7 +71,21 @@ public class Listeners implements Listener{
 			zom.getEquipment().setItemInMainHand(new ItemStack(Material.AIR));
 			
 			
-			cat.addPassenger(zom);			
+			cat.addPassenger(zom);		
+			
+			
+			
+			List<Entity> entities = cat.getNearbyEntities(10, 2, 10);
+			for(Entity ent : entities) {
+				if(ent instanceof Player) {
+					cat.setTarget((Player) ent);
+				}
+			}
+			
+			
+			
+			
+			
 			cats.add(cat.getUniqueId());
 			
 
@@ -99,9 +122,8 @@ public class Listeners implements Listener{
 		UUID uid = e.getEntity().getUniqueId();
 		
 		if(e.getEntity() instanceof Zombie) {
-			if(((Zombie) e.getEntity()).isBaby()) {
 				e.getDrops().clear();
-			}
+			
 		}
 		
 		
