@@ -23,6 +23,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -32,59 +33,66 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import net.minecraft.server.v1_13_R2.EntityOcelot;
 import net.minecraft.server.v1_13_R2.EntityZombie;
+import net.minecraft.server.v1_13_R2.PacketPlayOutEntityDestroy;
 public class Listeners implements Listener{
 	
 	static ArrayList<UUID> cats = new ArrayList<UUID>();
 	
-	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		
-	}
 
-	@EventHandler
-	public void onQuit(PlayerQuitEvent e) {
-	}
-	
-	
 	
 	@EventHandler
 	public void zombieDead(EntityDeathEvent e) {
 		LivingEntity le = e.getEntity();
-		if(le instanceof Zombie) {
-			if(((Zombie) le).isBaby()) return;
+		if(le instanceof Zombie && le.getUniqueId() != tempID) {
 			Location loc = le.getLocation();
 			Ocelot cat = (Ocelot) le.getWorld().spawnEntity(loc, EntityType.OCELOT);
 			cat.setCustomName(randomName(5));
 			cat.setCustomNameVisible(true);
 			cat.setAI(true);
 			
+			
 		
 			
-			Zombie zom = (Zombie) le.getWorld().spawnEntity(loc, EntityType.ZOMBIE);
+			Zombie zom = (Zombie) le.getWorld().spawnEntity(loc, EntityType.ZOMBIE);	
+			
+			
 			zom.setInvulnerable(true);
-			zom.setSilent(true);
-			zom.setCollidable(false);
-			zom.setBaby(true);
-			((CraftZombie) zom).getEquipment().setItemInMainHand(new ItemStack(Material.AIR));
-			((CraftZombie) zom).setPersistent(true);
-			zom.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, true, false));
-			zom.setCustomName(randomName(5));
-			zom.setCustomNameVisible(true);
+			zom.getEquipment().setItemInMainHand(new ItemStack(Material.AIR));
 			
-			cat.addPassenger(zom);
 			
+			cat.addPassenger(zom);			
 			cats.add(cat.getUniqueId());
+			
+
+			for( Player p : Bukkit.getServer().getOnlinePlayers()) {
+                PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(zom.getEntityId());
+                ((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+            }
+			
+			tempID = zom.getUniqueId();
 		}
 	}
+	
+	public UUID tempID;
 	
 	
 	@EventHandler
-	 public void onBurn(EntityCombustEvent e){
-		if(e.getEntity() instanceof Zombie) {			
-			e.setCancelled(true);
+	public void damageCat(EntityDamageByEntityEvent e) {
+		if(e.getEntity() instanceof Ocelot
+				&& cats.contains(e.getEntity().getUniqueId())
+				&& e.getDamager() instanceof Player) {
+		
+		
+		Ocelot cat = (Ocelot) e.getEntity();
+		Player p = (Player) e.getDamager();
+		
+		cat.setTarget(p);
 		}
 	}
+	
+	
 	
 	@EventHandler
 	public void catDies(EntityDeathEvent e) {
